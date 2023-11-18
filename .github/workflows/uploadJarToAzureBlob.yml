@@ -1,9 +1,9 @@
 name: Upload JAR to Azure Blob Storage
 
 on:
-  release:
-    types:
-      - created
+  push:
+    branches:
+      - main
 
 jobs:
   upload-jar:
@@ -17,21 +17,14 @@ jobs:
       uses: actions/setup-java@v2
       with:
         distribution: 'adopt'
-        java-version: '21'
+        java-version: '11'
 
     - name: Build and Package with Maven
       run: mvn clean package
-
-    - name: Get Release ID
-      id: get_release_id
-      run: echo "RELEASE_ID=$(echo $GITHUB_REF | awk -F/ '{print $3}')" >> $GITHUB_ENV
-
-    - name: Append Release ID to JAR Name
-      run: sed -i "s/.jar/-${RELEASE_ID}.jar/" ./target/*.jar
 
     - name: Upload JAR to Azure Blob Storage
       uses: azure/CLI@v1
       with:
         azcliversion: 2.33.0
         inlineScript: |
-          az storage blob upload --account-name ${{ secrets.AZURE_STORAGE_ACCOUNT }} --account-key ${{ secrets.AZURE_STORAGE_ACCESS_KEY }} --container-name your-container-name --type block --name your-jar-filename-${RELEASE_ID}.jar --type block --content ./target/*.jar
+          az storage blob upload --account-name ${{ secrets.AZURE_STORAGE_ACCOUNT }} --account-key ${{ secrets.AZURE_STORAGE_ACCESS_KEY }} --container-name your-container-name --type block --name your-jar-filename.jar --type block --content ./target/your-jar-filename.jar
