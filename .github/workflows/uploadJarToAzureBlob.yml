@@ -1,4 +1,4 @@
-retname: Upload JAR to Azure Blob Storage
+name: Upload JAR to Azure Blob Storage
 
 on:
   push:
