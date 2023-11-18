@@ -31,6 +31,9 @@ jobs:
       id: append_datetime
       run: echo "::set-output name=filename::azureapps-0.0.1-SNAPSHOT-$(date +'%Y%m%d%H%M%S').jar"
 
+    - name: echo_everything
+      id: echoing
+      run: echo ${{ steps.append_datetime.outputs.filename }}  "ENV SEC " echo ${{ env.AZURE_STORAGE_ACCOUNT  }}  "rep SEC " echo ${{ secret.AZURE_STORAGE_ACCOUNT  }}
 
     - name: Upload JAR to Azure Blob Storage
       uses: azure/CLI@v1
