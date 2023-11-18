@@ -50,7 +50,8 @@ jobs:
         username: ${{ secrets.AZURE_VM_SSH_USERNAME }}  # Replace with the username of your Azure VM
         key: ${{ secrets.AZURE_VM_SSH_PRIVATE_KEY }}  # Replace with the private key for SSH authentication
         port: ${{ secrets.AZURE_VM_SSH_PORT }}  # Replace with the SSH port of your Azure VM
+        script: sudo mkdir -p /home/java_apps/actions/
         source: ./target/azureapps-0.0.1-SNAPSHOT.jar  # Path to the JAR file to be copied
-        target: /home/java_apps/"${{ secrets.AZURE_STORAGE_ACCOUNT }}"  # Destination path on the Azure VM
+        target: /home/java_apps/actions/"${{ secrets.AZURE_STORAGE_ACCOUNT }}"  # Destination path on the Azure VM
         debug: true
         
