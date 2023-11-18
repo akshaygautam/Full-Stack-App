@@ -33,7 +33,7 @@ jobs:
 
     - name: echo_everything
       id: echoing
-      run: echo ${{ steps.append_datetime.outputs.filename }}  "ENV SEC echo ${{ env.AZURE_STORAGE_ACCOUNT  }} rep SEC  echo ${{ secret.AZURE_STORAGE_ACCOUNT  }} "
+      run: echo ${{ steps.append_datetime.outputs.filename }}  "ENV SEC echo ${{ env.AZURE_STORAGE_ACCOUNT  }} rep SEC  echo ${{ secrets.AZURE_STORAGE_ACCOUNT  }} "
 
     - name: Upload JAR to Azure Blob Storage
       uses: azure/CLI@v1
