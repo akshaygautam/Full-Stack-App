@@ -13,11 +13,16 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v2
 
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 16
+
     - name: Set up JDK
       uses: actions/setup-java@v2
       with:
         distribution: 'adopt'
-        java-version: '11'
+        java-version: '21'
 
     - name: Build and Package with Maven
       run: mvn clean package
