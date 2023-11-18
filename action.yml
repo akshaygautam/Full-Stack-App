@@ -1,0 +1,18 @@
+name: 'Await for Vercel deployment'
+description: 'Awaits for a Vercel deployment to be ready'
+branding:
+  icon: activity
+  color: black
+inputs:
+  deployment-url:
+    description: 'Url you want to wait for'
+    required: true
+  timeout:
+    description: 'Custom timeout value (default: "10" (seconds))'
+    required: false
+outputs:
+  deploymentDetails:
+    description: 'Forwarded Vercel API response - See https://vercel.com/docs/api#endpoints/deployments/get-a-single-deployment/response-parameters'
+runs:
+  using: 'node16'
+  main: 'github-action-runtime/index.js'
