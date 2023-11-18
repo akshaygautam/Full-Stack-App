@@ -37,4 +37,4 @@ jobs:
       with:
         azcliversion: 2.33.0
         inlineScript: |
-          az storage blob upload --account-name "${{ secrets.AZURE_STORAGE_ACCOUNT }}" --account-key "${{ secrets.AZURE_STORAGE_ACCESS_KEY }}" --container-name az204container --type block --name ${{ steps.append_datetime.outputs.filename }} --type block --source ./target/azureapps-0.0.1-SNAPSHOT.jar
+          az storage blob upload --account-name "${{ secrets.AZURE_STORAGE_ACCOUNT }}" --account-key "${{ secrets.AZURE_STORAGE_ACCESS_KEY }}" --container-name az204container --type block --name ${{ steps.append_datetime.outputs.filename }} --type block --source ./target/azureapps-0.0.1-SNAPSHOT.jar --content-type "application/java-archive"
