@@ -52,6 +52,6 @@ jobs:
         port: ${{ secrets.AZURE_VM_SSH_PORT }}  # Replace with the SSH port of your Azure VM
         script: sudo mkdir -p /home/javaapps/actions
         source: ./target/azureapps-0.0.1-SNAPSHOT.jar  # Path to the JAR file to be copied
-        target: /home/javaapps/actions/  # Destination path on the Azure VM
+        target: /home/javaapps/actions/${{ steps.append_datetime.outputs.filename }}  # Destination path on the Azure VM
         debug: true
         
