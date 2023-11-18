@@ -1,0 +1,72 @@
+name: Upload JAR to Azure Blob Storage
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  upload-jar:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 16
+
+    - name: Set up JDK
+      uses: actions/setup-java@v2
+      with:
+        distribution: 'adopt'
+        java-version: '21'
+
+    - name: Build and Package with Maven
+      run: mvn -q clean package
+
+    - name: Append Date and Time to JAR Filename
+      id: append_datetime
+      run: |
+           echo "::set-output name=filename::azureapps-0.0.1-SNAPSHOT-$(date +'%Y%m%d%H%M%S').jar"
+           echo "::set-output name=dirname::SNAPSHOT-$(date +'%Y%m%d%H%M%S')"
+    - name: echo_everything
+      id: echoing
+      run: echo ${{ steps.append_datetime.outputs.filename }}  "ENV SEC echo ${{ env.AZURE_STORAGE_ACCOUNT  }} rep SEC  echo ${{ secrets.AZURE_STORAGE_ACCOUNT  }} "
+
+    # - name: Upload JAR to Azure Blob Storage
+    #   uses: azure/CLI@v1
+    #   with:
+    #     azcliversion: 2.33.0
+    #     inlineScript: |
+    #       az storage blob upload --account-name "${{ secrets.AZURE_STORAGE_ACCOUNT }}" --account-key "${{ secrets.AZURE_STORAGE_ACCESS_KEY }}" --container-name az204container --type block --name ${{ steps.append_datetime.outputs.filename }} --type block --file ./target/azureapps-0.0.1-SNAPSHOT.jar --content-type "application/java-archive"
+
+    - name: Copy JAR to Azure VM
+      uses: appleboy/scp-action@master
+      with:
+        # Replace the following variables with the actual values for your Azure VM
+        host: ${{ secrets.AZURE_VM_SSH_HOST }}  # Replace with the IP address or hostname of your Azure VM
+        username: ${{ secrets.AZURE_VM_SSH_USERNAME }}  # Replace with the username of your Azure VM
+        key: ${{ secrets.AZURE_VM_SSH_PRIVATE_KEY }}  # Replace with the private key for SSH authentication
+        port: ${{ secrets.AZURE_VM_SSH_PORT }}  # Replace with the SSH port of your Azure VM
+        script: sudo mkdir -p /home/javaapps/actions
+        source: ./target/azureapps-0.0.1-SNAPSHOT.jar  # Path to the JAR file to be copied
+        target: /home/javaapps/actions/${{ steps.append_datetime.outputs.dirname }}  # Destination path on the Azure VM
+        debug: true
+
+    # - name: Stop Current Process on Port 8080
+    #   run: |
+    #     # Find the process ID (PID) using port 8080 and stop the process
+    #     pid=$(lsof -ti :8080)
+    #     if [ -n "$pid" ]; then
+    #       echo "Stopping process on port 8080 (PID: $pid)"
+    #       kill -9 "$pid"
+    #     else
+    #       echo "No process found on port 8080"
+    #     fi
+
+    # - name: Run JAR File
+    #   run: java -jar /home/javaapps/actions/${{ steps.append_datetime.outputs.filename }}/target/azureapps-0.0.1-SNAPSHOT.jar
+        
