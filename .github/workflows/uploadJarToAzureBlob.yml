@@ -52,17 +52,17 @@ jobs:
         key: ${{ secrets.AZURE_VM_SSH_PRIVATE_KEY }}  # Replace with the private key for SSH authentication
         port: ${{ secrets.AZURE_VM_SSH_PORT }}  # Replace with the SSH port of your Azure VM
         script: |
-          # Create directory if it doesn't exist
+          echo Create directory if it doesn't exist
           sudo mkdir -p /home/javaapps/actions/${{ steps.append_datetime.outputs.dirname }}
-          # Copy JAR file
+          echo Copy JAR file
           sudo cp ./target/azureapps-0.0.1-SNAPSHOT.jar /home/javaapps/actions/${{ steps.append_datetime.outputs.dirname }}
-          # Stop existing Java process if running
+          echo Stop existing Java process if running
           existing_pid=$(pgrep -f "java -jar /home/javaapps/actions")
           if [ -n "$existing_pid" ]; then
             echo "Stopping existing Java process (PID: $existing_pid)"
             sudo kill -15 "$existing_pid"
           fi
-          # Run the new Java process
+          echo Run the new Java process
           nohup sudo java -jar /home/javaapps/actions/${{ steps.append_datetime.outputs.filename }} > /home/javaapps/actions/output.log 2>&1 &
 
         source: ./target/azureapps-0.0.1-SNAPSHOT.jar  # Path to the JAR file to be copied
