@@ -57,11 +57,7 @@ jobs:
           echo Copy JAR file
           sudo cp ./target/azureapps-0.0.1-SNAPSHOT.jar /home/javaapps/actions/${{ steps.append_datetime.outputs.dirname }}
           echo Stop existing Java process if running
-          existing_pid=$(pgrep -f "java -jar /home/javaapps/actions")
-          if [ -n "$existing_pid" ]; then
-            echo "Stopping existing Java process (PID: $existing_pid)"
-            sudo kill -15 "$existing_pid"
-          fi
+          pkill -f azureapps-0.0.1-SNAPSHOT.jar
           echo Run the new Java process
           nohup sudo java -jar /home/javaapps/actions/${{ steps.append_datetime.outputs.filename }} > /home/javaapps/actions/output.log 2>&1 &
 
