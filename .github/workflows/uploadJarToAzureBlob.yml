@@ -8,8 +8,21 @@ on:
 jobs:
   upload-jar-and-release-new-version:
     runs-on: ubuntu-latest
+    env:
+     AZURE_STORAGE_CONTAINER_NAME: ${{ secrets.AZURE_STORAGE_CONTAINER_NAME }}
+     AZURE_STORAGE_ACCOUNT_NAME: ${{ secrets.AZURE_STORAGE_ACCOUNT_NAME }}
+     AZURE_STORAGE_ACCOUNT_ENDPOINT: ${{ secrets.AZURE_STORAGE_ACCOUNT_ENDPOINT }}
 
     steps:
+    - name: Print Environment Variables
+      run: env
+
+    - name: Validate ENV
+      run: echo $AZURE_STORAGE_ACCOUNT_NAME
+           echo $AZURE_STORAGE_CONTAINER_NAME
+           echo $AZURE_STORAGE_ACCOUNT_ENDPOINT
+           echo "My Secret ${{ secrets.MY_SECRET }}"
+      
     - name: Checkout Repository
       uses: actions/checkout@v2
 
