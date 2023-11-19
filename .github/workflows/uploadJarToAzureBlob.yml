@@ -57,15 +57,7 @@ jobs:
         debug: true
 
     - name: Stop Current Process on Port 8080
-      run: |
-        # Find the process ID (PID) using port 8080 and stop the process
-        pid=$(lsof -ti :8080)
-        if [ -n "$pid" ]; then
-          echo "Stopping process on port 8080 (PID: $pid)"
-          sudo kill -9 "$pid"
-        else
-          echo "No process found on port 8080"
-        fi
+      run: pkill -f azureapps-0.0.1-SNAPSHOT.jar
 
     - name: Run JAR File
       run: java -jar /home/javaapps/actions/${{ steps.append_datetime.outputs.dirname }}/target/azureapps-0.0.1-SNAPSHOT.jar
