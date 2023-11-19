@@ -16,9 +16,6 @@ jobs:
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v2
-      
-    - name: Use Environment Variable
-      run: echo "My Variable: $AZURE_STORAGE_ACCOUNT_NAME"
 
     - name: Set up Node.js
       uses: actions/setup-node@v4
