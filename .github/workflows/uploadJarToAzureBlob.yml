@@ -21,6 +21,7 @@ jobs:
       run: echo $AZURE_STORAGE_ACCOUNT_NAME
            echo $AZURE_STORAGE_CONTAINER_NAME
            echo $AZURE_STORAGE_ACCOUNT_ENDPOINT
+           echo "My Secret ${{ secrets.MY_SECRET }}"
       
     - name: Checkout Repository
       uses: actions/checkout@v2
