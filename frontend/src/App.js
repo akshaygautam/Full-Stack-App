@@ -15,6 +15,7 @@ function App() {
         <Base tableId="8"></Base>
         <Base tableId="9"></Base>
         <Base tableId="24"></Base>
+        <Base tableId="36"></Base>
       </header>
     </div>
   );
