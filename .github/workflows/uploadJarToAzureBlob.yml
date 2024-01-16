@@ -48,7 +48,7 @@ jobs:
 
     - name: Clean static folder
       run: |
-        rmdir /s /q ./backend/src/main/resources/static
+        rm -rf ./backend/src/main/resources/static
         mkdir -p ./backend/src/main/resources/static
         cp -R ./frontend/build/* ../backend/src/main/resources/static/
 
