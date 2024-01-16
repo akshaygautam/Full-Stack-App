@@ -37,6 +37,12 @@ jobs:
         distribution: 'adopt'
         java-version: '21'
 
+    - name: Build Frontend
+      run: |
+        cd ./frontend &&
+        npm install &&
+        npm run build
+
     - name: Build and Package with Maven
       run: mvn -q clean package
 
