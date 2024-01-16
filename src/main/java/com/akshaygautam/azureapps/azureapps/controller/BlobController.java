@@ -42,6 +42,7 @@ public class BlobController {
             if (file.isEmpty()) {
                 return "File is empty";
             }
+            System.out.println("Received File");
 
             // Get the blob name from the original filename
             String blobName = file.getOriginalFilename();
