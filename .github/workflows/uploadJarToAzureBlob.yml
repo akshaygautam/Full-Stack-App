@@ -37,6 +37,9 @@ jobs:
         distribution: 'adopt'
         java-version: '21'
 
+    - name: Build and Package with Maven
+      run: mvn -q clean package
+
     - name: Build Frontend
       run: |
         cd ./frontend &&
@@ -48,9 +51,6 @@ jobs:
         rmdir /s /q ./backend/src/main/resources/static
         mkdir -p ./backend/src/main/resources/static
         cp -R ./frontend/build/* ../backend/src/main/resources/static/
-
-    - name: Build and Package with Maven
-      run: mvn -q clean package
 
     - name: Append Date and Time to JAR Filename
       id: append_datetime
