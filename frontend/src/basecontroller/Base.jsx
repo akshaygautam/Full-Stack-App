@@ -16,8 +16,10 @@ class Base extends Component {
 
     fetchData = async () => {
         const { tableId } = this.props;
+        const baseUrl = window.location.origin;
         try {
-            const response = await fetch(`http://localhost:8080/akshaygautam/tableOf/${tableId}`);
+            const response = await fetch(`${baseUrl}/akshaygautam/tableOf/${tableId}`);
+            // const response = await fetch(`https://jsonplaceholder.typicode.com/todos/${tableId}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }

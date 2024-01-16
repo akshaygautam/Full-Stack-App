@@ -15,6 +15,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "build-local": "react-scripts build && xcopy .\\build\\* ..\\src\\main\\resources\\static /E /Y && rmdir /S /Q .\\build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
