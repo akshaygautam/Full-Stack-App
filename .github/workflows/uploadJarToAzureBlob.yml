@@ -45,9 +45,9 @@ jobs:
 
     - name: Clean static folder
       run: |
-        rmdir /s /q ../backend/src/main/resources/static
-        mkdir -p ../backend/src/main/resources/static
-        cp -R ./build/* ../backend/src/main/resources/static/
+        rmdir /s /q ./backend/src/main/resources/static
+        mkdir -p ./backend/src/main/resources/static
+        cp -R ./frontend/build/* ../backend/src/main/resources/static/
 
     - name: Build and Package with Maven
       run: mvn -q clean package
