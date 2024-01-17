@@ -9,76 +9,78 @@ jobs:
   upload-jar-and-release-new-version:
     runs-on: ubuntu-latest
     env:
-     AZURE_STORAGE_CONTAINER_NAME: ${{ secrets.AZURE_STORAGE_CONTAINER_NAME }}
-     AZURE_STORAGE_ACCOUNT_NAME: ${{ secrets.AZURE_STORAGE_ACCOUNT_NAME }}
-     AZURE_STORAGE_ACCOUNT_ENDPOINT: ${{ secrets.AZURE_STORAGE_ACCOUNT_ENDPOINT }}
+      AZURE_STORAGE_CONTAINER_NAME: ${{ secrets.AZURE_STORAGE_CONTAINER_NAME }}
+      AZURE_STORAGE_ACCOUNT_NAME: ${{ secrets.AZURE_STORAGE_ACCOUNT_NAME }}
+      AZURE_STORAGE_ACCOUNT_ENDPOINT: ${{ secrets.AZURE_STORAGE_ACCOUNT_ENDPOINT }}
 
     steps:
-    - name: Print Environment Variables
-      run: env
+      - name: Print Environment Variables
+        run: env
 
-    - name: Validate ENV
-      run: echo $AZURE_STORAGE_ACCOUNT_NAME
-           echo $AZURE_STORAGE_CONTAINER_NAME
-           echo $AZURE_STORAGE_ACCOUNT_ENDPOINT
-           echo "My Secret ${{ secrets.MY_SECRET }}"
-      
-    - name: Checkout Repository
-      uses: actions/checkout@v2
+      - name: Validate ENV
+        run: echo $AZURE_STORAGE_ACCOUNT_NAME
+          echo $AZURE_STORAGE_CONTAINER_NAME
+          echo $AZURE_STORAGE_ACCOUNT_ENDPOINT
+          echo "My Secret ${{ secrets.MY_SECRET }}"
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 16
+      - name: Checkout Repository
+        uses: actions/checkout@v2
 
-    - name: Set up JDK
-      uses: actions/setup-java@v2
-      with:
-        distribution: 'adopt'
-        java-version: '21'
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 16
 
-    - name: Build Frontend
-      run: |
-        cd ./frontend &&
-        npm install &&
-        npm run build
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '21'
 
-    - name: Clean static folder
-      run: |
-        rm -rf ./src/main/resources/static
-        mkdir -p ./src/main/resources/static
-        cp -R ./frontend/build/* ./src/main/resources/static/
+      - name: Build Frontend
+        run: |
+          cd ./frontend &&
+          npm install &&
+          npm run build
 
-    - name: Build and Package with Maven
-      run: mvn -q clean package -Pprod
+      - name: Clean static folder
+        run: |
+          rm -rf ./src/main/resources/static
+          mkdir -p ./src/main/resources/static
+          cp -R ./frontend/build/* ./src/main/resources/static/
 
-    # - name: Upload JAR to Azure Blob Storage
-    #   uses: azure/CLI@v1
-    #   with:
-    #     azcliversion: 2.33.0
-    #     inlineScript: |
-    #       az storage blob upload --account-name "${{ secrets.AZURE_STORAGE_ACCOUNT }}" --account-key "${{ secrets.AZURE_STORAGE_ACCESS_KEY }}" --container-name az204container --type block --name ${{ steps.append_datetime.outputs.filename }} --type block --file ./target/azureapps-0.0.1-SNAPSHOT.jar --content-type "application/java-archive"
+      - name: Build and Package with Maven
+        run: mvn -q clean package -Pprod
 
-    - name: Copy JAR to Azure VM
-      uses: appleboy/scp-action@master
-      with:
-        # Replace the following variables with the actual values for your Azure VM
-        host: ${{ secrets.AZURE_VM_SSH_HOST }}  # Replace with the IP address or hostname of your Azure VM
-        username: ${{ secrets.AZURE_VM_SSH_USERNAME }}  # Replace with the username of your Azure VM
-        key: ${{ secrets.AZURE_VM_SSH_PRIVATE_KEY }}  # Replace with the private key for SSH authentication
-        port: ${{ secrets.AZURE_VM_SSH_PORT }}  # Replace with the SSH port of your Azure VM
-        script: |
-          echo Create directory if it doesn't exist
-          sudo mkdir -p /home/javaapps/actions/
-          echo Copy JAR file
-          timestamp=$(date +"%Y-%m-%d_%H-%M-%S-%3N")
-          sudo cp ./Full-Stack-App/target/Full-Stack-App-SNAPSHOT-TIME-${timestamp}.jar /home/javaapps/actions/
-          echo Stop existing Java process if running
-          pkill -f Full-Stack-App-SNAPSHOT-TIME-${timestamp}.jar
-          echo Run the new Java process
-          nohup sudo java -jar /home/javaapps/actions/Full-Stack-App-SNAPSHOT-TIME-${timestamp}.jar > /home/javaapps/actions/output.log 2>&1 &
+      - name: Append Date and Time to JAR Filename
+        id: append_datetime
+        run: |
+          echo "::set-output name=filename::azureapps-0.0.1-SNAPSHOT-$(date +'%Y%m%d%H%M%S').jar"
+          echo "::set-output name=dirname::SNAPSHOT-$(date +'%Y%m%d%H%M%S')"
+      - name: echo_everything
+        id: echoing
+        run: echo ${{ steps.append_datetime.outputs.dirname }}
 
-        source: ./Full-Stack-App/target/Full-Stack-App-SNAPSHOT-TIME-${timestamp}.jar  # Path to the specific JAR file to be copied
-        target: /home/javaapps/actions/  # Destination path on the Azure VM
-        debug: true
+      # - name: Upload JAR to Azure Blob Storage
+      #   uses: azure/CLI@v1
+      #   with:
+      #     azcliversion: 2.33.0
+      #     inlineScript: |
+      #       az storage blob upload --account-name "${{ secrets.AZURE_STORAGE_ACCOUNT }}" --account-key "${{ secrets.AZURE_STORAGE_ACCESS_KEY }}" --container-name az204container --type block --name ${{ steps.append_datetime.outputs.filename }} --type block --file ./target/azureapps-0.0.1-SNAPSHOT.jar --content-type "application/java-archive"
 
+      - name: Copy JAR to Azure VM
+        uses: appleboy/scp-action@master
+        with:
+          # Replace the following variables with the actual values for your Azure VM
+          host: ${{ secrets.AZURE_VM_SSH_HOST }}  # Replace with the IP address or hostname of your Azure VM
+          username: ${{ secrets.AZURE_VM_SSH_USERNAME }}  # Replace with the username of your Azure VM
+          key: ${{ secrets.AZURE_VM_SSH_PRIVATE_KEY }}  # Replace with the private key for SSH authentication
+          port: ${{ secrets.AZURE_VM_SSH_PORT }}  # Replace with the SSH port of your Azure VM
+          script: |
+            echo Create directory if it doesn't exist
+            sudo mkdir -p /javaapps/actions/
+            echo Copy JAR file
+            sudo cp -r ./target/*  /javaapps/actions/
+          source: ./target/*  # Path to the JAR file to be copied
+          target: /javaapps/actions/ # Destination path on the Azure VM
+          debug: true
