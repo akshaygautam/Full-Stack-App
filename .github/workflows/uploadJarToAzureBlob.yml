@@ -94,4 +94,4 @@ jobs:
           port: ${{ env.AZURE_VM_SSH_PORT }}
           script: |
             cd /home/javaapps/fullstackapp/
-            java -jar ${{ steps.store_source.outputs.source }} > output.log 2>&1 &
+            java -jar "$(basename ${{ steps.store_source.outputs.source }})" > output.log 2>&1 &
