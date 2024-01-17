@@ -56,7 +56,7 @@ jobs:
         id: append_datetime
         run: |
           echo "::set-output name=filename::azureapps-0.0.1-SNAPSHOT-$(date +'%Y%m%d%H%M%S').jar"
-          echo "::set-output name=dirname::SNAPSHOT-$(date +'%Y%m%d%H%M%S')"
+          echo "::set-output name=dirname::fullstackapp-$(date +'%Y%m%d%H%M%S')"
       - name: echo_everything
         id: echoing
         run: echo ${{ steps.append_datetime.outputs.dirname }}
@@ -78,9 +78,9 @@ jobs:
           port: ${{ secrets.AZURE_VM_SSH_PORT }}  # Replace with the SSH port of your Azure VM
           script: |
             echo Create directory if it doesn't exist
-            sudo mkdir -p /home/javaapps/actions/
+            sudo mkdir -p /home/javaapps/${{ steps.append_datetime.outputs.dirname }}
             echo Copy JAR file
-            sudo cp -r ./target/*  /home/javaapps/actions/
+            sudo cp -r ./target/*  /home/javaapps/${{ steps.append_datetime.outputs.dirname }}
           source: ./target/*  # Path to the JAR file to be copied
           target: /home/javaapps/actions/ # Destination path on the Azure VM
           debug: true
