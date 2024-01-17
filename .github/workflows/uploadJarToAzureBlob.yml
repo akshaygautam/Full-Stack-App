@@ -68,17 +68,31 @@ jobs:
         key: ${{ secrets.AZURE_VM_SSH_PRIVATE_KEY }}  # Replace with the private key for SSH authentication
         port: ${{ secrets.AZURE_VM_SSH_PORT }}  # Replace with the SSH port of your Azure VM
         script: |
-          echo Create directory if it doesn't exist
-          sudo mkdir -p /home/javaapps/actions/
-          echo Copy JAR file
+          # Generate timestamp
           timestamp=$(date +"%Y-%m-%d_%H-%M-%S-%3N")
-          sudo cp ./Full-Stack-App/target/Full-Stack-App-SNAPSHOT-TIME-${timestamp}.jar /home/javaapps/actions/
-          echo Stop existing Java process if running
-          pkill -f Full-Stack-App-SNAPSHOT-TIME-${timestamp}.jar
-          echo Run the new Java process
-          nohup sudo java -jar /home/javaapps/actions/Full-Stack-App-SNAPSHOT-TIME-${timestamp}.jar > /home/javaapps/actions/output.log 2>&1 &
-
-        source: ./Full-Stack-App/target/Full-Stack-App-SNAPSHOT-TIME-${timestamp}.jar  # Path to the specific JAR file to be copied
-        target: /home/javaapps/actions/  # Destination path on the Azure VM
+          jarName="Full-Stack-App-SNAPSHOT-TIME-${timestamp}.jar"
+          source="./Full-Stack-App/target/${jarName}"
+          destination="/home/javaapps/actions/${jarName}"
+    
+          echo "JAR Name: ${jarName}"
+          echo "Complete Source: ${source}"
+          echo "Complete Destination: ${destination}"
+    
+          # Check if source exists
+          if [ -e "$source" ]; then
+            echo "Source exists. Copying JAR file..."
+            # Create directory if it doesn't exist
+            sudo mkdir -p /home/javaapps/actions/
+            # Copy JAR file
+            sudo cp "$source" "$destination"
+            # Stop existing Java process if running
+            pkill -f "$jarName"
+            # Run the new Java process
+            nohup sudo java -jar "$destination" > /home/javaapps/actions/output.log 2>&1 &
+          else
+            echo "Source does not exist. Skipping JAR file copy."
+          fi
+    
         debug: true
+
 
