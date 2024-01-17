@@ -18,7 +18,8 @@ jobs:
         run: env
 
       - name: Validate ENV
-        run: echo $AZURE_STORAGE_ACCOUNT_NAME
+        run: |
+          echo $AZURE_STORAGE_ACCOUNT_NAME
           echo $AZURE_STORAGE_CONTAINER_NAME
           echo $AZURE_STORAGE_ACCOUNT_ENDPOINT
           echo "My Secret ${{ secrets.MY_SECRET }}"
@@ -55,32 +56,31 @@ jobs:
       - name: Append Date and Time to JAR Filename
         id: append_datetime
         run: |
-          echo "::set-output name=filename::azureapps-0.0.1-SNAPSHOT-$(date +'%Y%m%d%H%M%S').jar"
+          echo "::set-output name=filename::Full-Stack-App-SNAPSHOT-$(date +'%Y%m%d%H%M%S').jar"
           echo "::set-output name=dirname::fullstackapp-$(date +'%Y%m%d%H%M%S')"
+
       - name: echo_everything
         id: echoing
         run: echo ${{ steps.append_datetime.outputs.dirname }}
 
-      # - name: Upload JAR to Azure Blob Storage
-      #   uses: azure/CLI@v1
-      #   with:
-      #     azcliversion: 2.33.0
-      #     inlineScript: |
-      #       az storage blob upload --account-name "${{ secrets.AZURE_STORAGE_ACCOUNT }}" --account-key "${{ secrets.AZURE_STORAGE_ACCESS_KEY }}" --container-name az204container --type block --name ${{ steps.append_datetime.outputs.filename }} --type block --file ./target/azureapps-0.0.1-SNAPSHOT.jar --content-type "application/java-archive"
+      - name: Store JAR Filename in Source Variable
+        id: store_source
+        run: |
+          echo "::set-output name=source::$(find ./target/ -type f -name 'Full-Stack-App-SNAPSHOT-TIME-*.jar' | head -n 1)"
+        shell: bash
 
       - name: Copy JAR to Azure VM
         uses: appleboy/scp-action@master
         with:
-          # Replace the following variables with the actual values for your Azure VM
-          host: ${{ secrets.AZURE_VM_SSH_HOST }}  # Replace with the IP address or hostname of your Azure VM
-          username: ${{ secrets.AZURE_VM_SSH_USERNAME }}  # Replace with the username of your Azure VM
-          key: ${{ secrets.AZURE_VM_SSH_PRIVATE_KEY }}  # Replace with the private key for SSH authentication
-          port: ${{ secrets.AZURE_VM_SSH_PORT }}  # Replace with the SSH port of your Azure VM
+          host: ${{ secrets.AZURE_VM_SSH_HOST }}
+          username: ${{ secrets.AZURE_VM_SSH_USERNAME }}
+          key: ${{ secrets.AZURE_VM_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.AZURE_VM_SSH_PORT }}
           script: |
-            echo Create directory if it doesn't exist
+            echo "Create directory if it doesn't exist"
             sudo mkdir -p /home/javaapps/fullstackapp/
-            echo Copy JAR file
-            sudo cp  $(find ./target/ -type f -name "Full-Stack-App-SNAPSHOT-TIME-*.jar" | head -n 1)  /home/javaapps/fullstackapp/
-          source: $(find ./target/ -type f -name "Full-Stack-App-SNAPSHOT-TIME-*.jar" | head -n 1)  # Path to the JAR file to be copied
-          target: /home/javaapps/fullstackapp/ # Destination path on the Azure VM
+            echo "Copy JAR file"
+            sudo cp ${{ steps.store_source.outputs.source }} /home/javaapps/fullstackapp/
+          source: ${{ steps.store_source.outputs.source }}
+          target: /home/javaapps/fullstackapp/
           debug: true
