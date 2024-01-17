@@ -1,4 +1,4 @@
-name: Upload JAR to Azure VM and Run
+name: Upload JAR to Azure Blob Storage
 
 on:
   push:
@@ -6,15 +6,24 @@ on:
       - main
 
 jobs:
-  upload-jar-and-run-on-azure-vm:
+  upload-jar-and-release-new-version:
     runs-on: ubuntu-latest
     env:
-      AZURE_VM_SSH_HOST: ${{ secrets.AZURE_VM_SSH_HOST }}
-      AZURE_VM_SSH_USERNAME: ${{ secrets.AZURE_VM_SSH_USERNAME }}
-      AZURE_VM_SSH_PRIVATE_KEY: ${{ secrets.AZURE_VM_SSH_PRIVATE_KEY }}
-      AZURE_VM_SSH_PORT: ${{ secrets.AZURE_VM_SSH_PORT }}
+      AZURE_STORAGE_CONTAINER_NAME: ${{ secrets.AZURE_STORAGE_CONTAINER_NAME }}
+      AZURE_STORAGE_ACCOUNT_NAME: ${{ secrets.AZURE_STORAGE_ACCOUNT_NAME }}
+      AZURE_STORAGE_ACCOUNT_ENDPOINT: ${{ secrets.AZURE_STORAGE_ACCOUNT_ENDPOINT }}
 
     steps:
+      - name: Print Environment Variables
+        run: env
+
+      - name: Validate ENV
+        run: |
+          echo $AZURE_STORAGE_ACCOUNT_NAME
+          echo $AZURE_STORAGE_CONTAINER_NAME
+          echo $AZURE_STORAGE_ACCOUNT_ENDPOINT
+          echo "My Secret ${{ secrets.MY_SECRET }}"
+
       - name: Checkout Repository
         uses: actions/checkout@v2
 
@@ -44,6 +53,16 @@ jobs:
       - name: Build and Package with Maven
         run: mvn -q clean package -Pprod
 
+      - name: Append Date and Time to JAR Filename
+        id: append_datetime
+        run: |
+          echo "::set-output name=filename::Full-Stack-App-SNAPSHOT-$(date +'%Y%m%d%H%M%S').jar"
+          echo "::set-output name=dirname::fullstackapp-$(date +'%Y%m%d%H%M%S')"
+
+      - name: echo_everything
+        id: echoing
+        run: echo ${{ steps.append_datetime.outputs.dirname }}
+
       - name: Store JAR Filename in Source Variable
         id: store_source
         run: |
@@ -53,17 +72,15 @@ jobs:
       - name: Copy JAR to Azure VM
         uses: appleboy/scp-action@master
         with:
-          host: ${{ env.AZURE_VM_SSH_HOST }}
-          username: ${{ env.AZURE_VM_SSH_USERNAME }}
-          key: ${{ env.AZURE_VM_SSH_PRIVATE_KEY }}
-          port: ${{ env.AZURE_VM_SSH_PORT }}
+          host: ${{ secrets.AZURE_VM_SSH_HOST }}
+          username: ${{ secrets.AZURE_VM_SSH_USERNAME }}
+          key: ${{ secrets.AZURE_VM_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.AZURE_VM_SSH_PORT }}
           script: |
             echo "Create directory if it doesn't exist"
             sudo mkdir -p /home/javaapps/fullstackapp/
             echo "Copy JAR file"
             sudo cp ${{ steps.store_source.outputs.source }} /home/javaapps/fullstackapp/
-            echo "Run JAR file in silent mode and write logs to a new file"
-            nohup sudo java -jar /home/javaapps/fullstackapp/$(basename ${{ steps.store_source.outputs.source }}) > /home/javaapps/fullstackapp/output.log 2>&1 &
           source: ${{ steps.store_source.outputs.source }}
           target: /home/javaapps/fullstackapp/
           debug: true
