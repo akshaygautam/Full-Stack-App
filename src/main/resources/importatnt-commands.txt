@@ -3,3 +3,5 @@
  nohup java -jar azureapps-0.0.1-SNAPSHOT.jar output.log 2>&1 &   => run jar in background
  vi .env  => open env
  source .env => export env
+
+ ssh -i {privateKey} username@ipadd

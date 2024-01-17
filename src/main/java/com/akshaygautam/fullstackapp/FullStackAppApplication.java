@@ -1,13 +1,13 @@
-package com.akshaygautam.azureapps.azureapps;
+package com.akshaygautam.fullstackapp;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class AzureappsApplication {
+public class FullStackAppApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(AzureappsApplication.class, args);
+		SpringApplication.run(FullStackAppApplication.class, args);
 	}
 
 

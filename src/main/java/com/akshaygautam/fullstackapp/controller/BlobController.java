@@ -1,4 +1,4 @@
-package com.akshaygautam.azureapps.azureapps.controller;
+package com.akshaygautam.fullstackapp.controller;
 
 import com.azure.storage.blob.*;
 import com.azure.storage.blob.models.BlobItem;

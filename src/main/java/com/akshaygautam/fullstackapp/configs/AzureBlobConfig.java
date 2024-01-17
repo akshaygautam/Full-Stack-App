@@ -1,4 +1,4 @@
-package com.akshaygautam.azureapps.azureapps.configs;
+package com.akshaygautam.fullstackapp.configs;
 
 import com.azure.storage.blob.*;
 import org.springframework.beans.factory.annotation.Value;

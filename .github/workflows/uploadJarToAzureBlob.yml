@@ -52,15 +52,6 @@ jobs:
     - name: Build and Package with Maven
       run: mvn -q clean package -Pprod
 
-    - name: Append Date and Time to JAR Filename
-      id: append_datetime
-      run: |
-           echo "::set-output name=filename::azureapps-0.0.1-SNAPSHOT-$(date +'%Y%m%d%H%M%S').jar"
-           echo "::set-output name=dirname::SNAPSHOT-$(date +'%Y%m%d%H%M%S')"
-    - name: echo_everything
-      id: echoing
-      run: echo ${{ steps.append_datetime.outputs.dirname }} 
-
     # - name: Upload JAR to Azure Blob Storage
     #   uses: azure/CLI@v1
     #   with:
@@ -78,14 +69,16 @@ jobs:
         port: ${{ secrets.AZURE_VM_SSH_PORT }}  # Replace with the SSH port of your Azure VM
         script: |
           echo Create directory if it doesn't exist
-          sudo mkdir -p /home/javaapps/actions/${{ steps.append_datetime.outputs.dirname }}
+          sudo mkdir -p /home/javaapps/actions/
           echo Copy JAR file
-          sudo cp ./target/azureapps-0.0.1-SNAPSHOT.jar /home/javaapps/actions/${{ steps.append_datetime.outputs.dirname }}
+          timestamp=$(date +"%Y-%m-%d_%H-%M-%S-%3N")
+          sudo cp ./Full-Stack-App/target/Full-Stack-App-SNAPSHOT-TIME-${timestamp}.jar /home/javaapps/actions/
           echo Stop existing Java process if running
-          pkill -f azureapps-0.0.1-SNAPSHOT.jar
+          pkill -f Full-Stack-App-SNAPSHOT-TIME-${timestamp}.jar
           echo Run the new Java process
-          nohup sudo java -jar /home/javaapps/actions/${{ steps.append_datetime.outputs.filename }} > /home/javaapps/actions/output.log 2>&1 &
+          nohup sudo java -jar /home/javaapps/actions/Full-Stack-App-SNAPSHOT-TIME-${timestamp}.jar > /home/javaapps/actions/output.log 2>&1 &
 
-        source: ./target/azureapps-0.0.1-SNAPSHOT.jar  # Path to the JAR file to be copied
-        target: /home/javaapps/actions/${{ steps.append_datetime.outputs.dirname }}  # Destination path on the Azure VM
+        source: ./Full-Stack-App/target/Full-Stack-App-SNAPSHOT-TIME-${timestamp}.jar  # Path to the specific JAR file to be copied
+        target: /home/javaapps/actions/  # Destination path on the Azure VM
         debug: true
+

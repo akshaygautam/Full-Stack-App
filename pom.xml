@@ -8,13 +8,14 @@
 		<version>3.1.5</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.akshaygautam.azureapps</groupId>
-	<artifactId>azureapps</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>azureapps</name>
+	<groupId>com.akshaygautam.fullstackapp</groupId>
+	<artifactId>Full-Stack-App</artifactId>
+	<version>SNAPSHOT-TIME-${maven.build.timestamp}</version>
+	<name>Full-Stack-App</name>
 	<description>Demo project for Spring Boot</description>
 	<properties>
 		<java.version>21</java.version>
+		<maven.build.timestamp.format>yyyy-MM-dd_HH-mm-ss-SS</maven.build.timestamp.format>
 	</properties>
 	<dependencies>
 		<dependency>

@@ -1,4 +1,4 @@
-package com.akshaygautam.azureapps.azureapps.controller;
+package com.akshaygautam.fullstackapp.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
