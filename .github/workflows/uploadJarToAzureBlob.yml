@@ -78,9 +78,9 @@ jobs:
           port: ${{ secrets.AZURE_VM_SSH_PORT }}  # Replace with the SSH port of your Azure VM
           script: |
             echo Create directory if it doesn't exist
-            sudo mkdir -p /home/javaapps/${{ steps.append_datetime.outputs.dirname }}
+            sudo mkdir -p /home/javaapps/fullstackapp/
             echo Copy JAR file
-            sudo cp -r ./target/*  /home/javaapps/${{ steps.append_datetime.outputs.dirname }}
-          source: ./target/*  # Path to the JAR file to be copied
-          target: /home/javaapps/actions/ # Destination path on the Azure VM
+            sudo cp  $(find ./target/ -type f -name "Full-Stack-App-SNAPSHOT-TIME-*.jar" | head -n 1)  /home/javaapps/fullstackapp/
+          source: $(find ./target/ -type f -name "Full-Stack-App-SNAPSHOT-TIME-*.jar" | head -n 1)  # Path to the JAR file to be copied
+          target: /home/javaapps/fullstackapp/ # Destination path on the Azure VM
           debug: true
