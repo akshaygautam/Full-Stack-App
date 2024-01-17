@@ -84,3 +84,14 @@ jobs:
           source: ${{ steps.store_source.outputs.source }}
           target: /home/javaapps/fullstackapp/
           debug: true
+
+      - name: Run JAR on Azure VM
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.AZURE_VM_SSH_HOST }}
+          username: ${{ env.AZURE_VM_SSH_USERNAME }}
+          key: ${{ env.AZURE_VM_SSH_PRIVATE_KEY }}
+          port: ${{ env.AZURE_VM_SSH_PORT }}
+          script: |
+            cd /home/javaapps/fullstackapp/
+            java -jar ${{ steps.store_source.outputs.source }} > output.log 2>&1 &
