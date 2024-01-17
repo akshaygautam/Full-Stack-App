@@ -1,51 +1,88 @@
-import React, {Component} from "react";
+// BaseUI.js
+import React, { Component } from "react";
+import { fetchData } from "./BaseService";
+import {Input, Button, Table, Space, Spin, Alert, Divider} from "antd";
+
+const columns = [
+    {
+        title: 'Multiplication',
+        dataIndex: 'multiplication',
+        key: 'multiplication',
+    },
+    {
+        title: 'Result',
+        dataIndex: 'result',
+        key: 'result',
+    },
+];
 
 class Base extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            tableId: "",
             data: null,
-            loading: true,
+            loading: false,
             error: null,
         };
     }
 
-    componentDidMount() {
-        this.fetchData();
-    }
+    handleChange = (e) => {
+        this.setState({ tableId: e.target.value });
+    };
 
-    fetchData = async () => {
-        const { tableId } = this.props;
+    handleSubmit = async (e) => {
+        e.preventDefault();
+        const { tableId } = this.state;
+
+        if (!tableId.trim()) {
+            return; // Do not fetch data if the tableId is empty or only contains spaces
+        }
+
+        this.setState({ loading: true, error: null });
+
         try {
-            const response = await fetch(`/akshaygautam/tableOf/${tableId}`);
-            // const response = await fetch(`https://jsonplaceholder.typicode.com/todos/${tableId}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            const data = await response.json();
+            const data = await fetchData(tableId);
             this.setState({ data, loading: false });
         } catch (error) {
             this.setState({ error, loading: false });
         }
     };
+
     render() {
-        const { data, loading, error } = this.state;
+        const { tableId, data, loading, error } = this.state;
 
-        if (loading) {
-            return <p>Loading...</p>;
-        }
-
-        if (error) {
-            return <p>Error: {error.message}</p>;
-        }
+        const dataSource = data
+            ? data.map((item, index) => {
+                const [multiplication, result] = item.split('=');
+                return { key: index, multiplication, result };
+            })
+            : [];
 
         return (
             <div>
-                <h1>Data:</h1>
-                <pre>{JSON.stringify(data, null, 2)}</pre>
+                <Divider>Table Generator</Divider>
+                <form onSubmit={this.handleSubmit}>
+                    <Space>
+                        <Input placeholder="Table ID" value={tableId} onChange={this.handleChange} />
+                        <Button type="primary" htmlType="submit">
+                            Submit
+                        </Button>
+                    </Space>
+                </form>
+
+                {loading && <Spin tip="Loading..." />}
+                {error && <Alert message={`Error: ${error.message}`} type="error" showIcon />}
+
+                {data && (
+                    <div style={{ marginTop: 20 }}>
+                        <h1>Multiplication Table:</h1>
+                        <Table columns={columns} dataSource={dataSource} pagination={false} />
+                    </div>
+                )}
             </div>
         );
     }
 }
 
-export default  Base;
+export default Base;

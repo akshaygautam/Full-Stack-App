@@ -1,88 +1,106 @@
+// BlobUploader.js
 import React, { useState } from 'react';
-import axios from 'axios';
+import { Button, Upload, message, Progress } from 'antd';
+import { UploadOutlined, PauseCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
+import { uploadBlob, createCancelTokenSource } from './BlobService';
+import axios from "axios";
 
-function BlobUploader() {
-    const [progress, setProgress] = useState(0);
-    const [size, setSize] = useState(0);
+const BlobUploader = () => {
+    const [file, setFile] = useState(null);
     const [cancelTokenSource, setCancelTokenSource] = useState(null);
+    const [uploading, setUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
 
-    const handleFileUpload = (event) => {
-        const file = event.target.files[0];
-        const fileSizeInMB = file.size / (1024 * 1024);
-        setSize(fileSizeInMB ? fileSizeInMB.toFixed(2) : 0);
-        setProgress(0); // Reset progress
-        uploadBlob(file);
-    };
+    const customRequest = async ({ file, onSuccess, onError, onProgress }) => {
+        setUploadProgress(0);
+        setCancelTokenSource(createCancelTokenSource());
+        setUploading(true);
 
-    const cancelUpload = () => {
-        if (cancelTokenSource) {
-            cancelTokenSource.cancel('Upload canceled by user');
-            setCancelTokenSource(null);
+        try {
+            await uploadBlob(file, (progressEvent) => {
+                const percent = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+                onProgress({ percent });
+                setUploadProgress(percent);
+            }, cancelTokenSource);
+
+            onSuccess();
+            setFile(null);
+            message.success('File upload complete');
+        } catch (error) {
+            onError(error);
+            if (!axios.isCancel(error)) {
+                message.error('File upload failed');
+            }
+        } finally {
+            setUploading(false);
+            if (cancelTokenSource) {
+                setCancelTokenSource(null);
+            }
         }
     };
 
-    const uploadBlob = (file) => {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('fileName', file.name);
+    const handleCancel = () => {
+        if (cancelTokenSource) {
+            cancelTokenSource.cancel('Upload canceled by user');
+            message.warn('File upload canceled');
+        }
+    };
 
-        const source = axios.CancelToken.source();
-        setCancelTokenSource(source);
-
-        const config = {
-            headers: {
-                'content-type': 'multipart/form-data',
-            },
-            onUploadProgress: (progressEvent) => {
-                if (cancelTokenSource && cancelTokenSource.token.reason) {
-                    // Upload canceled
-                    return;
-                }
-
-                const percentage = Math.round(
-                    (progressEvent.loaded * 100) / progressEvent.total
-                );
-                setProgress(percentage);
-            },
-            cancelToken: source.token,
-        };
-
-        axios
-            .post('blob/upload', formData, config)
-            .then((response) => {
-                console.log(response.data);
-                setProgress(0); // Reset progress when the upload is complete
-            })
-            .catch((error) => {
-                if (axios.isCancel(error)) {
-                    console.log('Upload canceled:', error.message);
-                } else {
-                    // Handle other errors
-                    console.error('Upload failed:', error.message);
-                }
-            })
-            .finally(() => {
-                setCancelTokenSource(null);
+    const handleToggleUpload = () => {
+        if (uploading) {
+            handleCancel();
+        } else if (file) {
+            customRequest({
+                file,
+                onSuccess: () => {},
+                onError: () => {},
+                onProgress: () => {},
             });
+        } else {
+            message.warning('Please select a file before starting the upload');
+        }
+    };
+
+    const handleChange = (info) => {
+        if (info.file.status === 'done' || info.file.status === 'error') {
+            setFile(info.file.originFileObj);
+        }
     };
 
     return (
         <div>
-            <form>
-                <h1>Select File to upload:</h1>
-                <input type="file" onChange={handleFileUpload} />
-                <div>
-                    <p>
-                        Uploading of file size {size} MB : {progress}%
-                    </p>
-                    <progress value={progress} max="100"></progress>
-                </div>
-                <button type="button" onClick={cancelUpload} disabled={!cancelTokenSource}>
-                    Cancel Upload
-                </button>
-            </form>
+            <Upload
+                customRequest={customRequest}
+                showUploadList={false}
+                beforeUpload={() => false} // Disable automatic upload
+                onChange={handleChange}
+            >
+                <Button icon={<UploadOutlined />} disabled={uploading}>
+                    Select File
+                </Button>
+            </Upload>
+            <Progress percent={uploadProgress} style={{ marginTop: 8 }} />
+
+            <Button
+                type="primary"
+                icon={uploading ? <PauseCircleOutlined /> : <UploadOutlined />}
+                onClick={handleToggleUpload}
+                style={{ marginTop: 8, marginRight: 8 }}
+            >
+                {uploading ? 'Pause Upload' : 'Start Upload'}
+            </Button>
+
+            <Button
+                type="primary"
+                icon={<CloseCircleOutlined />}
+                onClick={handleCancel}
+                disabled={!cancelTokenSource || !uploading}
+                style={{ marginTop: 8 }}
+            >
+                Cancel Upload
+            </Button>
         </div>
     );
-}
+};
 
 export default BlobUploader;
