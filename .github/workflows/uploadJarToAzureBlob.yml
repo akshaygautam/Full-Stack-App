@@ -14,16 +14,6 @@ jobs:
       AZURE_STORAGE_ACCOUNT_ENDPOINT: ${{ secrets.AZURE_STORAGE_ACCOUNT_ENDPOINT }}
 
     steps:
-      - name: Print Environment Variables
-        run: env
-
-      - name: Validate ENV
-        run: |
-          echo $AZURE_STORAGE_ACCOUNT_NAME
-          echo $AZURE_STORAGE_CONTAINER_NAME
-          echo $AZURE_STORAGE_ACCOUNT_ENDPOINT
-          echo "My Secret ${{ secrets.MY_SECRET }}"
-
       - name: Checkout Repository
         uses: actions/checkout@v2
 
@@ -52,16 +42,6 @@ jobs:
 
       - name: Build and Package with Maven
         run: mvn -q clean package -Pprod
-
-      - name: Append Date and Time to JAR Filename
-        id: append_datetime
-        run: |
-          echo "::set-output name=filename::Full-Stack-App-SNAPSHOT-$(date +'%Y%m%d%H%M%S').jar"
-          echo "::set-output name=dirname::fullstackapp-$(date +'%Y%m%d%H%M%S')"
-
-      - name: echo_everything
-        id: echoing
-        run: echo ${{ steps.append_datetime.outputs.dirname }}
 
       - name: Store JAR Filename in Source Variable
         id: store_source
