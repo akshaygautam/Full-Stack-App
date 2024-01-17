@@ -6,10 +6,6 @@ import {Layout} from "antd";
 import ContentPane from "../content/ContentPane";
 
 export default class Skeleton extends Component{
-    constructor(props, context) {
-        super(props, context);
-    }
-
 
     render() {
         return <Layout>
