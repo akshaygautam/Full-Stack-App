@@ -1,6 +1,5 @@
-import react, {Component} from "react";
+import {Component} from "react";
 import {Content} from "antd/es/layout/layout";
-import BlobUploader from "../blob-handler/BlobUploader";
 import BlobList from "../blob-handler/BlobList";
 import Base from "../basecontroller/Base";
 

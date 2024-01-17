@@ -1,9 +1,8 @@
-import react, {Component} from "react";
+import {Component} from "react";
 import Sidebar from "../sidebar/Sidebar";
 import Ribbon from "../ribbon/Ribbon";
-import BottomPane from "../footer/BottomPane";
+import BottomPane from "../bottom-pane/BottomPane";
 import {Layout} from "antd";
-import {Content} from "antd/es/layout/layout";
 import ContentPane from "../content/ContentPane";
 
 export default class Skeleton extends Component{

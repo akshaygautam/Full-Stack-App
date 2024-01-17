@@ -1,4 +1,4 @@
-import react, {Component} from "react";
+import  {Component} from "react";
 import {Header} from "antd/es/layout/layout";
 
 export default class Ribbon extends Component {
